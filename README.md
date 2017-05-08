@@ -2,3 +2,4 @@
 For CS 599 Group 8's final project
 ## To be able to clone and use this git repo on the CUSP Cluster follow this guide:
 https://help.github.com/articles/connecting-to-github-with-ssh/
+Then copy your add your ssh key here: https://github.com/settings/keys
