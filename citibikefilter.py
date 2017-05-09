@@ -1,5 +1,4 @@
 #!/usr/bin/python
-
 import csv
 
 def csvRows(filename):
