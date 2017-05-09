@@ -1,5 +1,6 @@
 #!/usr/bin/python
 
+import csv
 
 def csvRows(filename):
    with open(filename, 'r') as fi:
