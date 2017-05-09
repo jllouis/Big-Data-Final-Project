@@ -1,3 +1,6 @@
+#!/usr/bin/python
+
+
 def csvRows(filename):
    with open(filename, 'r') as fi:
        reader = csv.DictReader(fi)
