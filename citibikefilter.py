@@ -2,8 +2,7 @@
 import csv
 import sys
 
-cibike_files = sys.argv[1]
-citibike_filtered_file = sys.argv[2]
+citbike_files = sys.argv[1]
 
 for file in citbike_files:
    def csvRows(filename):
