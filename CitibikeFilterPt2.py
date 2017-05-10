@@ -2,6 +2,7 @@
 import sys
 
 count = 0
+trip_info = []
 for row in sys.stdin:
    if count == 1: 
        row = row.split(',')
