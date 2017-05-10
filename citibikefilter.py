@@ -8,7 +8,7 @@ def csvRows(filename):
            yield row
 
 trip_info = []            
-for row in csvRows('citibike.csv'):
+for row in csvRows('https://data.cusp.nyu.edu/filebrowser/view=/user/gdicarl000/projectdata/citibike/201307-citibike-tripdata.csv'):
    dates, time = row['starttime'].split(' ')
    hours,minutes,seconds = time.split(':')
    if int(hours) >= 7 and int(hours) <= 9 :
