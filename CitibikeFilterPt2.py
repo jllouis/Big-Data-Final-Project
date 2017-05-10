@@ -14,6 +14,6 @@ for row in sys.stdin:
             latitude = row[6]
             starttime = row[3]
             trip_info.append((tripduration, longitude,latitude,starttime))
-            print trip_info
+            sys.stdout.write(trip_info)
    else:
        count = 1
