@@ -11,8 +11,8 @@ with open(citbike_files, 'r') as citibike_file:
             reader = csv.DictReader(fi)
             for row in reader:
                 yield row
-            
-
+      
+      
       trip_info = []            
       for row in csvRows(file):
          dates, time = row['starttime'].split(' ')
