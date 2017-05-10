@@ -6,6 +6,7 @@ def csvRows(filename):
        reader = csv.DictReader(fi)
        for row in reader:
            yield row
+            
 
 trip_info = []            
 for row in csvRows('https://data.cusp.nyu.edu/filebrowser/view=/user/gdicarl000/projectdata/citibike/201307-citibike-tripdata.csv'):
