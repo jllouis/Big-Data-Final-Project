@@ -1,21 +1,35 @@
 import csv
 import operator
 
-d = dict()
+station_totals = dict()
 numStations = 0
 
 with open('Latest_Turnstile_Counts_At_Midnight.csv', 'rb') as fi:
     reader = csv.DictReader(fi)
     for row in reader:
-        if row['STATION'] not in d:
-            d[row['STATION']] = [int(row['ENTRIES']), int(row['EXITS']), str(row['LINENAME'])]
+        if row['STATION'] not in station_totals:
+            station_totals[row['STATION']] = [int(row['ENTRIES']), int(row['EXITS']),
+                                              str(row['LINENAME']), None]
             numStations += 1
         else:
-            d[row['STATION']][0] += int(row['ENTRIES'])
-            d[row['STATION']][1] += int(row['EXITS'])
+            station_totals[row['STATION']][0] += int(row['ENTRIES'])
+            station_totals[row['STATION']][1] += int(row['EXITS'])
 
-top_entry_stations = sorted(d.items(), key=operator.itemgetter(0), reverse=True)
-top_exit_stations = sorted(d.items(), key=operator.itemgetter(1), reverse=True)
+# station_locations = dict()
+#
+# with open('DOITT_SUBWAY_STATION_01_13SEPT2010.csv') as fi:
+#     reader = csv.DictReader(fi)
+#     for record in reader:
+#         station_locations[record['NAME']] = record['the_geom']
+#
+# for station in station_totals:
+#     station_totals[station] = [station_totals[station][0], station_totals[station][1],
+#                                station_totals[station][2], station_locations[station]]
+
+top_entry_stations = sorted(station_totals.items(), key=operator.itemgetter(0), reverse=True)
+top_exit_stations = sorted(station_totals.items(), key=operator.itemgetter(1), reverse=True)
+
+
 print "Number of Stations: " + str(numStations)
 
 # print top 50 stations
