@@ -2,8 +2,8 @@
 import sys
 
 for row in sys.stdin:
-   print row
    row = row.split(',')
+   print row
    dates,time = row[3].split(':')
    hours,minutes,seconds = time.split(':')
    sys.stdout.write(row)
