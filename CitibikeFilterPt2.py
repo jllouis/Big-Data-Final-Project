@@ -5,7 +5,7 @@ count = 0
 for row in sys.stdin:
    if count == 1: 
        row = row.split(',')
-       dates,time = row[3].split(':')
+       dates,time = row[3].split(' ')
        hours,minutes,seconds = time.split(':')
        sys.stdout.write(row)
        if int(hours) >= 7 and int(hours) <= 9:
