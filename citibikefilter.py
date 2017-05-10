@@ -5,7 +5,7 @@ import sys
 
 citbike_files = 'user/gdicarl000/projectdata/citibike'
 
-with open(citibike_files, 'r') as citibike_files:
+with open(citibike_files, 'r') as citbike_files:
     for file in citbike_files:
         def csvRows(filename):
             with open(filename, 'r') as fi:
