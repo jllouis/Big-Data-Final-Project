@@ -10,7 +10,7 @@ for file in citbike_files:
         with open(filename, 'r') as fi:
             reader = csv.DictReader(fi)
             for row in reader:
-            yield row
+                yield row
     
 trip_info = []            
 for row in csvRows(file):
