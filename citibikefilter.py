@@ -3,7 +3,7 @@ import csv
 import sys
 
 
-citbike_files = 'user/gdicarl000/projectdata/citibike'
+citibike_files = 'user/gdicarl000/projectdata/citibike'
 
 with open(citibike_files, 'r') as citbike_files:
     for file in citbike_files:
