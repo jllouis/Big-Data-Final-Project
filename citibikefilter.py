@@ -4,7 +4,8 @@ import sys
 
 citbike_files = sys.argv[1]
 
-for file in citbike_files:
+with open(citbike_files, 'r') as citibike_file:
+for file in citbike_file:
    def csvRows(filename):
       with open(filename, 'r') as fi:
           reader = csv.DictReader(fi)
