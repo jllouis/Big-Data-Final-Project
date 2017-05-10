@@ -6,6 +6,7 @@ for row in sys.stdin:
    if row[0] == "cartodb_id":
        row(next)
    row = row.split(',')
+   print row[3]
    dates,time = row[3].split(' ')
    hours,minutes,seconds = time.split(':')
    if int(hours) >= 7 and int(hours) <= 9:
