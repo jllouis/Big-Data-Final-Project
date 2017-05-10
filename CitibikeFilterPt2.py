@@ -2,7 +2,8 @@
 import sys
 
 for row in sys.stdin:
-   dates,time = row.split(',')[3].split(':')
+   row = row.split(',')
+   dates,time = row.split(':')
    hours,minutes,seconds = time.split(':')
    sys.stdout.write(row)
    if int(hours) >= 7 and int(hours) <= 9:
