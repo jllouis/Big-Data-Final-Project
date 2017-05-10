@@ -17,3 +17,4 @@ for row in sys.stdin:
             sys.stdout.write(trip_info)
    else:
        count = 1
+sys.stdout.flush()
