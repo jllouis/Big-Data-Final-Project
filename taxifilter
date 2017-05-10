@@ -17,7 +17,9 @@ for row in sys.stdin:
         latitude_pickup = row[6]
         longitude_dropoff = row[9]
         latitude_dropoff = row[10]
-        trip_info.append((duration,longitude_pickup,latitude_pickup, longitude_dropoff,latitude_dropoff,duration,pickup_time))
+        trip_info.append((longitude_pickup,latitude_pickup, longitude_dropoff,latitude_dropoff,duration,pickup_time))
         sys.stdout.write(''.join(str(a) for a in trip_info))
    count = 1
+   
+   
 sys.stdout.flush()
