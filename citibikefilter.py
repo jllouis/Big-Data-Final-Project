@@ -3,7 +3,7 @@ import csv
 import sys
 
 
-citibike_files = 'user/gdicarl000/projectdata/citibike'
+citibike_files = 'https://data.cusp.nyu.edu/filebrowser/view=/user/gdicarl000#/user/gdicarl000/projectdata/citibike'
 
 with open(citibike_files, 'r') as citbike_files:
     for file in citbike_files:
