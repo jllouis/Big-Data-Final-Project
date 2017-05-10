@@ -3,7 +3,7 @@ import csv
 import sys
 
 
-citbike_files = sys.argv[1]
+citbike_files = 'user/gdicarl000/projectdata/citibike'
 
 for file in citbike_files:
     def csvRows(filename):
