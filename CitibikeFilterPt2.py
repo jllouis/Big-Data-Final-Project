@@ -1,10 +1,9 @@
  #!/usr/bin/python
 import sys
 
-count = 0
 trip_info = []
 for row in sys.stdin:
-   if count == 1: 
+   if row[0] != "cartodb_id":
        row = row.split(',')
        dates,time = row[3].split(' ')
        hours,minutes,seconds = time.split(':')
@@ -15,6 +14,5 @@ for row in sys.stdin:
             starttime = row[3]
             trip_info.append((tripduration, longitude,latitude,starttime))
             sys.stdout.write(''.join(str(a) for a in trip_info))
-   else:
-       count = 1
+
 sys.stdout.flush()
