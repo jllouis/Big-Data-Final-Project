@@ -2,7 +2,7 @@
 import sys
 
 for row in sys.stdin:
-   print row[1]
+   print row
    row = row.split(',')
    dates,time = row[3].split(':')
    hours,minutes,seconds = time.split(':')
