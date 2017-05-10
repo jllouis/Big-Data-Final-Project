@@ -7,7 +7,6 @@ for row in sys.stdin:
        row = row.split(',')
        dates,time = row[3].split(' ')
        hours,minutes,seconds = time.split(':')
-       sys.stdout.write(row)
        if int(hours) >= 7 and int(hours) <= 9:
             tripduration = row[2]
             longitude = row[7]
