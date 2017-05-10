@@ -1,19 +1,23 @@
  #!/usr/bin/python
 import sys
+from datetime import datetime
 
 trip_info = []
 count = 0
 for row in sys.stdin:
    if count != 0:
       row = row.split(',')
-      dates,time = row[3].split(' ')
+      dates,pickup_time = row[1].split(' ')
       hours,minutes,seconds = time.split(':')
       if int(hours) >= 7 and int(hours) <= 9:
-        tripduration = row[2]
-        longitude = row[7]
-        latitude = row[6]
-        starttime = row[3]
-        trip_info.append((tripduration, longitude,latitude,starttime))
+        dates, dropoff_time = row[2].split(' ')
+        FMT = '%H:%M:%S'
+        duration = datetime.strptime(dropoff_time, FMT) - datetime.strptime(pickup_time,FMT)
+        longitude_pickup = row[5]
+        latitude_pickup = row[6]
+        longitude_dropoff = row[9]
+        latitude_dropoff = row[10]
+        trip_info.append((duration,longitude_pickup,latitude_pickup, longitude_dropoff,latitude_dropoff,duration,pickup_time))
         sys.stdout.write(''.join(str(a) for a in trip_info))
    count = 1
 sys.stdout.flush()
