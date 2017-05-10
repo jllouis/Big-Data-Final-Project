@@ -3,7 +3,7 @@ import sys
 
 for row in sys.stdin:
    row = row.split(',')
-   print row
+   print row[1]
    dates,time = row[3].split(':')
    hours,minutes,seconds = time.split(':')
    sys.stdout.write(row)
