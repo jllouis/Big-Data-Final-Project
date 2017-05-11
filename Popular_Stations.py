@@ -4,7 +4,7 @@ import operator
 station_totals = dict()  # this dictionary keeps track of the total number of entries and exits per station
 numStations = 0  # keeps track of the number of stations
 unmatched = 0  # keeps track of the number of stations there were unable to be matched with location coordinates
-num_chars = 6
+num_chars = 5
 
 with open('Latest_Turnstile_Counts_At_Midnight.csv', 'rb') as fi:
     ''' Insert each station into the dictionary given that it's not already in there
