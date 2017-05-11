@@ -23,7 +23,7 @@ for row in sys.stdin:
         sys.stdout.write(latitude_pickup)
         sys.stdout.write(longitude_dropoff)
         sys.stdout.write(latitude_dropoff)
-        sys.stdout.write(duration)
+        sys.stdout.write(str(duration))
         sys.stdout.write(pickup_time)
    count = 1
    
