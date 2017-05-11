@@ -72,8 +72,8 @@ def process(infile, outfile, accuracy=3):
         print "Opening Input File..."
         writer = csv.writer(writefile, delimiter=',')
 
-        time.sleep(1)
         while stopTime > startTime:
+            time.sleep(3 * 60)  # get data every five minutes
             with open(infile, 'rb') as readfile:
                 reader = csv.reader(readfile, delimiter=',')
                 print "Processing File..."
