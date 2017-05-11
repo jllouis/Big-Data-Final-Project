@@ -71,15 +71,17 @@ def process(infile, outfile, accuracy=3):
     with open(outfile, 'wb') as writefile:
         print "Opening Input File..."
         writer = csv.writer(writefile, delimiter=',')
-
+        writer.writerow(['TIMESTAMP', 'START STATION', 'START LONGITUDE', 'START LATITUDE',
+                         'END STATION', 'END LONGITUDE', 'END LATITUDE', 'TIME ESTIMATE'])
+        first_time = True
         while stopTime > startTime:
-            time.sleep(3 * 60)  # get data every five minutes
+            if not first_time:
+                time.sleep(3 * 60)  # get data every five minutes
             with open(infile, 'rb') as readfile:
                 reader = csv.reader(readfile, delimiter=',')
                 print "Processing File..."
                 next(reader)
-                writer.writerow(['TIMESTAMP', 'START STATION', 'START LONGITUDE', 'START LATITUDE',
-                                 'END STATION', 'END LONGITUDE', 'END LATITUDE', 'TIME ESTIMATE'])
+
                 for line in reader:
                     writer.writerow([str(datetime.datetime.now()), line[0], line[1], line[2], line[3], line[4], line[5],
                                      get_time_estimate(session_client, round(float(line[1]), accuracy),
