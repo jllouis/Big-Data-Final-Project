@@ -21,6 +21,6 @@ for row in sys.stdin:
    count = 1
    
    
-   sys.stdout.write(str(trip_info))
+   sys.stdout.write( ','.join([str(item) for item in trip_info]))
    
 sys.stdout.flush()
