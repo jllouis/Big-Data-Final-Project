@@ -1,9 +1,11 @@
-# Big Data Project: Uber API Utility Script Version 0.2
+# Big Data Project: Uber API Utility Script Version 1.0
 # CSC 599, Team 8.
 # Takes in csv file of starting longitude and latitude,
 # ending longitude and latitude, and outputs a file of the time estimates
 # next to the corresponding longitudes and latitudes
 import csv
+import datetime
+import time
 from optparse import OptionParser
 
 from uber_rides.client import UberRidesClient
@@ -11,11 +13,13 @@ from uber_rides.session import Session
 
 print "Uber API Utility Script:"
 
+startTime = datetime.datetime.now().hour
+stopTime = startTime + 2
 
 # Parse command line options and arguments, then start process()
 def parse_opts():
     # creating and configuring command line options parser
-    parser = OptionParser(version="%prog 0.2")
+    parser = OptionParser(version="%prog 1.0")
     parser.add_option("-f", "--file", dest="filename", metavar="INPUT_FILE_NAME",
               help="The input file to process.")
     parser.add_option("-o", "--outfile", dest="output", metavar="OUTPUT_FILE_NAME",
@@ -62,21 +66,25 @@ def get_time_estimate(client, start_lat, start_long, end_lat, end_long, seats=2)
 # does reads input coordinates, gets time estimates, and writes the coordinates and time estimate in output file
 def process(infile, outfile, accuracy=3):
     session_client = create_uber_session()
-    print "Opening Input File..."
 
-    with open(infile, 'rb') as readfile:
-        reader = csv.reader(readfile, delimiter=',')
-        print "Creating Output File..."
-        with open(outfile, 'wb') as writefile:
-            writer = csv.writer(writefile, delimiter=',')
-            print "Processing File..."
-            writer.writerow(['START STATION', 'START LONGITUDE', 'START LATITUDE',
-                             'END STATION', 'END LONGITUDE', 'END LATITUDE', 'TIME ESTIMATE'])
-            for line in reader:
-                writer.writerow([line[0], line[1], line[2], line[3], line[4], line[5],
-                                 get_time_estimate(session_client, round(float(line[1]), accuracy),
-                                                   round(float(line[2]), accuracy), round(float(line[4]), accuracy),
-                                                   round(float(line[5]), accuracy))])
+    print "Creating Output File..."
+    with open(outfile, 'wb') as writefile:
+        print "Opening Input File..."
+        writer = csv.writer(writefile, delimiter=',')
+
+        time.sleep(1)
+        while stopTime > startTime:
+            with open(infile, 'rb') as readfile:
+                reader = csv.reader(readfile, delimiter=',')
+                print "Processing File..."
+                next(reader)
+                writer.writerow(['TIMESTAMP', 'START STATION', 'START LONGITUDE', 'START LATITUDE',
+                                 'END STATION', 'END LONGITUDE', 'END LATITUDE', 'TIME ESTIMATE'])
+                for line in reader:
+                    writer.writerow([str(datetime.datetime.now()), line[0], line[1], line[2], line[3], line[4], line[5],
+                                     get_time_estimate(session_client, round(float(line[1]), accuracy),
+                                                       round(float(line[2]), accuracy), round(float(line[4]), accuracy),
+                                                       round(float(line[5]), accuracy))])
 
 
 parse_opts()
