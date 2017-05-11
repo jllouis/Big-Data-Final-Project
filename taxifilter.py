@@ -11,6 +11,7 @@ for row in sys.stdin:
       dates,pickup_time = row[1].split(' ')
       hours,minutes,seconds = pickup_time.split(':')
       if int(hours) >= 7 and int(hours) <= 9:
+        
         dates, dropoff_time = row[2].split(' ')
         FMT = '%H:%M:%S'
         duration = datetime.strptime(dropoff_time, FMT) - datetime.strptime(pickup_time,FMT)
@@ -18,7 +19,12 @@ for row in sys.stdin:
         latitude_pickup = row[6]
         longitude_dropoff = row[9]
         latitude_dropoff = row[10]
-        sys.stdout.write((longitude_pickup,latitude_pickup, longitude_dropoff,latitude_dropoff,duration,pickup_time))
+        sys.stdout.write(longitude_pickup)
+        sys.stdout.write(latitude_pickup)
+        sys.stdout.write(longitude_dropoff)
+        sys.stdout.write(latitude_dropoff)
+        sys.stdout.write(duration)
+        sys.stdout.write(pickup_time)
    count = 1
    
  #  for i in trip_info:
