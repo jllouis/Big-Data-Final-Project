@@ -8,21 +8,22 @@ unmatched = 0
 with open('Latest_Turnstile_Counts_At_Midnight.csv', 'rb') as fi:
     reader = csv.DictReader(fi)
     for row in reader:
-        if row['STATION'] not in station_totals:
-            station_totals[str(row['STATION'])] = [int(row['ENTRIES']), int(row['EXITS']),
+        if str(row['STATION'])[:5] not in station_totals:
+            station_totals[str(row['STATION'])[:5]] = [int(row['ENTRIES']), int(row['EXITS']),
                                                    str(row['LINENAME']), None]
             numStations += 1
         else:
-            station_totals[row['STATION']][0] += int(row['ENTRIES'])
-            station_totals[row['STATION']][1] += int(row['EXITS'])
+            station_totals[str(row['STATION'])[:5]][0] += int(row['ENTRIES'])
+            station_totals[str(row['STATION'])[:5]][1] += int(row['EXITS'])
 
 station_locations = dict()
 
 with open('DOITT_SUBWAY_STATION_01_13SEPT2010.csv') as fi:
     reader = csv.DictReader(fi)
     for record in reader:
-        station_locations[str(record['NAME']).upper()] = record['the_geom']
+        station_locations[str(record['NAME']).upper()[:5]] = str(record['the_geom'])[7:-1].replace(' ', ', ')
 
+    # noinspection PyRedeclaration
     for station in station_locations:
         station = str(station).replace('TH', '')
         station = str(station).replace('ND', '')
@@ -42,11 +43,21 @@ top_exit_stations = sorted(station_totals.items(), key=operator.itemgetter(1), r
 
 print "Number of Stations: " + str(numStations)
 
-# print top 50 stations
-print "Top Exit Stations:"
-for x in range(50):
-        print top_exit_stations[x]
+# remove stations without coordinates
+
+for i in range(0, 100):
+    if top_entry_stations[i][1][3] is None:
+        del top_entry_stations[i]
+
+# for i in range(0, 100):
+#     if top_exit_stations[i][1][3] is None:
+#         del top_exit_stations[i]
+#
+# # print top 50 stations
+# print "Top Exit Stations:"
+# for x in range(100):
+#         print top_exit_stations[x]
 
 print "Top Entry Stations: "
-for x in range(50):
-    print top_entry_stations[x]
+for x in range(100):
+    print top_entry_stations[x][1][3]
