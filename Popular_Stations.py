@@ -10,7 +10,7 @@ with open('Latest_Turnstile_Counts_At_Midnight.csv', 'rb') as fi:
     for row in reader:
         if str(row['STATION'])[:5] not in station_totals:
             station_totals[str(row['STATION'])[:5]] = [int(row['ENTRIES']), int(row['EXITS']),
-                                                   str(row['LINENAME']), None]
+                                                       str(row['LINENAME']), None]
             numStations += 1
         else:
             station_totals[str(row['STATION'])[:5]][0] += int(row['ENTRIES'])
@@ -38,17 +38,24 @@ for station in station_totals:
 print "Was unable to match " + str(unmatched) + " stations."
 
 top_entry_stations = sorted(station_totals.items(), key=operator.itemgetter(0), reverse=True)
-top_exit_stations = sorted(station_totals.items(), key=operator.itemgetter(1), reverse=True)
+# top_exit_stations = sorted(station_totals.items(), key=operator.itemgetter(1), reverse=True)
 
 
 print "Number of Stations: " + str(numStations)
 
 # remove stations without coordinates
 
-for i in range(0, 100):
+for i in range(136):
     if top_entry_stations[i][1][3] is None:
         del top_entry_stations[i]
 
+top_entry_stations_reversed = []
+
+for i in range(99, -1, -1):
+    top_entry_stations_reversed.append(top_entry_stations[i])
+
+# Commented out the following code because I figured the most popular entry and exist stations
+# would have much overlap since people usually use the same station to exit to work, and commute to home
 # for i in range(0, 100):
 #     if top_exit_stations[i][1][3] is None:
 #         del top_exit_stations[i]
@@ -58,6 +65,17 @@ for i in range(0, 100):
 # for x in range(100):
 #         print top_exit_stations[x]
 
-print "Top Entry Stations: "
-for x in range(100):
-    print top_entry_stations[x][1][3]
+print len(top_entry_stations_reversed)
+print len(top_entry_stations)
+with open('Popular_Stations_Output.csv', 'wb') as fi:
+    writer = csv.writer(fi, delimiter=',')
+    writer.writerow(['START STATION', 'START LONGITUDE', 'START LATITUDE',
+                     'END STATION', 'END LONGITUDE', 'END LATITUDE'])
+    for x in range(100):
+        writer.writerow([top_entry_stations[x][0], top_entry_stations[x][1][3].split(', ')[1],
+                         top_entry_stations[x][1][3].split(', ')[0],
+                         top_entry_stations_reversed[x][0],
+                         top_entry_stations_reversed[x][1][3].split(', ')[1],
+                         top_entry_stations_reversed[x][1][3].split(', ')[0]])
+
+print('Done!')

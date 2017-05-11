@@ -70,11 +70,13 @@ def process(infile, outfile, accuracy=3):
         with open(outfile, 'wb') as writefile:
             writer = csv.writer(writefile, delimiter=',')
             print "Processing File..."
+            writer.writerow(['START STATION', 'START LONGITUDE', 'START LATITUDE',
+                             'END STATION', 'END LONGITUDE', 'END LATITUDE', 'TIME ESTIMATE'])
             for line in reader:
-                writer.writerow([line[0], line[1], line[2], line[3],
-                                get_time_estimate(session_client, round(float(line[0]), accuracy),
-                                                  round(float(line[1]), accuracy), round(float(line[2]), accuracy),
-                                                  round(float(line[3]), accuracy))])
+                writer.writerow([line[0], line[1], line[2], line[3], line[4], line[5],
+                                 get_time_estimate(session_client, round(float(line[1]), accuracy),
+                                                   round(float(line[2]), accuracy), round(float(line[4]), accuracy),
+                                                   round(float(line[5]), accuracy))])
 
 
 parse_opts()
