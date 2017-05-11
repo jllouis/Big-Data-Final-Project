@@ -11,7 +11,6 @@ for row in sys.stdin:
       dates,pickup_time = row[1].split(' ')
       hours,minutes,seconds = pickup_time.split(':')
       if int(hours) >= 7 and int(hours) <= 9:
-        
         dates, dropoff_time = row[2].split(' ')
         FMT = '%H:%M:%S'
         duration = datetime.strptime(dropoff_time, FMT) - datetime.strptime(pickup_time,FMT)
