@@ -20,7 +20,7 @@ for row in sys.stdin:
         trip_info.append((longitude_pickup,latitude_pickup, longitude_dropoff,latitude_dropoff,duration,pickup_time))
    count = 1
    
-   
-   sys.stdout.write(str(i) for i in trip_info)
+   for i in trip_info:
+        sys.stdout.write(str(i))
    
 sys.stdout.flush()
