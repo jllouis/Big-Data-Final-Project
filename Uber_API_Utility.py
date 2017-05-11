@@ -14,7 +14,8 @@ from uber_rides.session import Session
 print "Uber API Utility Script:"
 
 startTime = datetime.datetime.now().hour
-stopTime = startTime + 2
+stopTime = startTime + 3  # collect data for three hours
+
 
 # Parse command line options and arguments, then start process()
 def parse_opts():
@@ -76,7 +77,7 @@ def process(infile, outfile, accuracy=3):
         first_time = True
         while stopTime > startTime:
             if not first_time:
-                time.sleep(3 * 60)  # get data every five minutes
+                time.sleep(3 * 60)  # get data every three minutes
             with open(infile, 'rb') as readfile:
                 reader = csv.reader(readfile, delimiter=',')
                 print "Processing File..."
