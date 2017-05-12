@@ -77,7 +77,7 @@ def process(infile, outfile, accuracy=3):
         first_time = True
         while stopTime > startTime:
             if not first_time:
-                time.sleep(5 * 60)  # get data every three minutes
+                time.sleep(6*60)  # get data every six minutes
             with open(infile, 'rb') as readfile:
                 reader = csv.reader(readfile, delimiter=',')
                 print "Processing File..."
