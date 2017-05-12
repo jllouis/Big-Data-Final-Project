@@ -15,7 +15,6 @@ print "Uber API Utility Script:"
 
 startTime = datetime.datetime.now().hour
 stopTime = startTime + 3  # collect data for three hours
-batchNumber = 1
 
 # Parse command line options and arguments, then start process()
 def parse_opts():
@@ -66,6 +65,7 @@ def get_time_estimate(client, start_lat, start_long, end_lat, end_long, seats=2)
 
 # does reads input coordinates, gets time estimates, and writes the coordinates and time estimate in output file
 def process(infile, outfile, accuracy=3):
+    batch_number = 1
     session_client = create_uber_session()
 
     print "Creating Output File..."
@@ -80,7 +80,7 @@ def process(infile, outfile, accuracy=3):
                 time.sleep(3*60)  # get data every three minutes
             with open(infile, 'rb') as readfile:
                 reader = csv.reader(readfile, delimiter=',')
-                print "Processing File Batch " + str(batchNumber) + "..."
+                print "Processing File Batch " + str(batch_number) + "..."
                 next(reader)
 
                 for line in reader:
@@ -89,7 +89,7 @@ def process(infile, outfile, accuracy=3):
                                                        round(float(line[2]), accuracy), round(float(line[4]), accuracy),
                                                        round(float(line[5]), accuracy))])
             first_time = False
-            batchNumber += 1
+            batch_number += 1
 
 
 parse_opts()
