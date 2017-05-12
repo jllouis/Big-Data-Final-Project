@@ -15,7 +15,7 @@ print "Uber API Utility Script:"
 
 startTime = datetime.datetime.now().hour
 stopTime = startTime + 3  # collect data for three hours
-
+batchNumber = 1
 
 # Parse command line options and arguments, then start process()
 def parse_opts():
@@ -80,7 +80,7 @@ def process(infile, outfile, accuracy=3):
                 time.sleep(3*60)  # get data every three minutes
             with open(infile, 'rb') as readfile:
                 reader = csv.reader(readfile, delimiter=',')
-                print "Processing File..."
+                print "Processing File Batch " + str(batchNumber) + "..."
                 next(reader)
 
                 for line in reader:
@@ -89,6 +89,7 @@ def process(infile, outfile, accuracy=3):
                                                        round(float(line[2]), accuracy), round(float(line[4]), accuracy),
                                                        round(float(line[5]), accuracy))])
             first_time = False
+            batchNumber += 1
 
 
 parse_opts()
