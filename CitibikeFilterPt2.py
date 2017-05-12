@@ -4,7 +4,7 @@ import sys
 trip_info = []
 count = 0
 for row in sys.stdin:
-   if count = 0:
+   if count == 0:
         count = 1
    else:
         row = row.split(',')
