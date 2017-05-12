@@ -77,7 +77,7 @@ def process(infile, outfile, accuracy=3):
         first_time = True
         while stopTime > startTime:
             if not first_time:
-                time.sleep(6*60)  # get data every six minutes
+                time.sleep(3*60)  # get data every three minutes
             with open(infile, 'rb') as readfile:
                 reader = csv.reader(readfile, delimiter=',')
                 print "Processing File..."
@@ -88,6 +88,7 @@ def process(infile, outfile, accuracy=3):
                                      get_time_estimate(session_client, round(float(line[1]), accuracy),
                                                        round(float(line[2]), accuracy), round(float(line[4]), accuracy),
                                                        round(float(line[5]), accuracy))])
+                    first_time = False
 
 
 parse_opts()
