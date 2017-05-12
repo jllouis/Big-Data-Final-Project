@@ -1,9 +1,22 @@
+''' Big Data Project: Popular Stations Script Version 0.9
+    CSC 599, Team 8
+    Takes in the MTA Subway Turnstile counts CSV file
+    and the MTA Subway locations CSV file
+    and calculates the most popular stations in term of ENTRIES
+    along with the location coordinates as referenced by the locations data
+    The program outputs the list of the top 100 stations, matched along side
+    the list of the least popular of the top 100 stations (essentially the 
+    top 100 stations in reverse order, with the coordinates of both the stations
+    following. This output file will is ready to be processed by the 
+    Uber API Utility Script as outputted.'''
+
 import csv
 import operator
 
 station_totals = dict()  # this dictionary keeps track of the total number of entries and exits per station
 numStations = 0  # keeps track of the number of stations
-unmatched = 0  # keeps track of the number of stations there were unable to be matched with location coordinates
+unmatched = 0  # keeps track of the number of stations there
+# were unable to be matched with location coordinates
 num_chars = 6
 
 with open('Latest_Turnstile_Counts_At_Midnight.csv', 'rb') as fi:

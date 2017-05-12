@@ -30,7 +30,8 @@ def get_one_citi():
         else:
             s.unionAll(i)
     return s
-
-c =get_one_citi()
-c.registerTempTable('test')
-c.write.format('com.databricks.spark.csv').save('/user/gdicarl000/projectdata/citibike/temp_spark_combine')
+if __name__=='__main__':
+    sc = SparkContext()
+    c =get_one_citi()
+    c.registerTempTable('test')
+    c.write.format('com.databricks.spark.csv').save('/user/gdicarl000/projectdata/citibike/temp_spark_combine')
