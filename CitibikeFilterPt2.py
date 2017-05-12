@@ -2,6 +2,7 @@
 import sys
 
 trip_info = []
+print("working")
 for row in sys.stdin:
    if row[1] == "starttime":
    print("skipped")
