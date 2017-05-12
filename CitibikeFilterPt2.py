@@ -2,11 +2,11 @@
 import sys
 
 trip_info = []
-print("working")
+count = 0
 for row in sys.stdin:
-   if row[1] == "starttime":
-   print("skipped")
+   if count == 0:
        next(row)
+       count = 1
    row = row.split(',')
    dates,time = row[1].split(' ')
    hours,minutes,seconds = time.split(':')
