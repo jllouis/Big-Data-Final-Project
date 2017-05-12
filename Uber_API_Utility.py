@@ -88,7 +88,7 @@ def process(infile, outfile, accuracy=3):
                                      get_time_estimate(session_client, round(float(line[1]), accuracy),
                                                        round(float(line[2]), accuracy), round(float(line[4]), accuracy),
                                                        round(float(line[5]), accuracy))])
-                    first_time = False
+            first_time = False
 
 
 parse_opts()
