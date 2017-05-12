@@ -1,7 +1,6 @@
  #!/usr/bin/python
 import sys
 
-trip_info = []
 count = 0
 for row in sys.stdin:
    if count == 0:
@@ -11,13 +10,12 @@ for row in sys.stdin:
         dates,time = row[1].split(' ')
         hours,minutes,seconds = time.split(':')
         if int(hours) >= 7 and int(hours) <= 9:
-             tripduration = row[0]
-             startlongitude = row[5]
-             startlatitude = row[6]
-             stoplatitude = row[8]
-             stoplongitude =row[9]
-             starttime = row[1]
-             trip_info.append((tripduration, startlongitude,startlatitude,stoplatitude,stoplongitude,starttime))
-             sys.stdout.write(''.join(str(a) for a in trip_info))
+             sys.stdout.write(row[0])
+             sys.stdout.write(row[5])
+             sys.stdout.write(row[6])
+             sys.stdout.write(row[8])
+             sys.stdout.write(row[9])
+             sys.stdout.write(row[1])
+
 
 sys.stdout.flush()
