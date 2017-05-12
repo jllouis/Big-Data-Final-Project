@@ -3,7 +3,7 @@ import sys
 
 trip_info = []
 for row in sys.stdin:
-   if row[0] == "tripduration":
+   if row[1] == "starttime":
        next(row)
    row = row.split(',')
    dates,time = row[1].split(' ')
