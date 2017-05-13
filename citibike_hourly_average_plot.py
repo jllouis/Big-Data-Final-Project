@@ -97,6 +97,23 @@ def get_one_citi():
             s = s.unionAll(i)
    return s
 
+def save_dataframe_to_plot(df):
+   # for miles
+   avgRDD = yellow.rdd.map(get_miles)
+   avgRDD= avgRDD.mapValues(lambda x: (x,1))
+   avgRDD = avgRDD.reduceByKey(lambda x, y: (x[0] + y[0], x[1] + y[1]))
+   avgRDD= avgRDD.mapValues(lambda y : 1.0 * y[0] / y[1])
+   #avgRDD.show(2)
+
+   schema2 = StructType([StructField("Hour", IntegerType()), StructField("Miles", FloatType())])
+   mdf = sqlContext.createDataFrame(avgRDD,schema2)
+   #mdf.show(10)
+
+   # convert to panda df
+   mpdDF = mdf.toPandas()
+return mpDF
+
+
 # get combined dataframe of all
 comb =get_one_citi()
 #comb.createOrReplaceTempView("citibike")
@@ -107,22 +124,11 @@ comb =get_one_citi()
 #comb.coalesce(1).write.format('com.databricks.spark.csv').option("header", "true").save('/user/btimals000/citibike_spark1.csv')
 
 # for miles
-avgRDD = comb.rdd.map(get_miles)
-avgRDD= avgRDD.mapValues(lambda x: (x,1))
-avgRDD = avgRDD.reduceByKey(lambda x, y: (x[0] + y[0], x[1] + y[1]))
-avgRDD= avgRDD.mapValues(lambda y : 1.0 * y[0] / y[1])
+CitiAvgDF = save_dataframe_to_plot(comb)
 #avgRDD.take(2)
-
-schema2 = StructType([StructField("Hour", IntegerType()), StructField("Miles", FloatType())])
-mdf = sqlContext.createDataFrame(avgRDD,schema2)
-#mdf.show(10)
-
-# convert to pdf
-mpdDF = mdf.toPandas()#pdf = pdf.cumsum()
-#mpdDF['Time'] = pd.to_datetime(mpdDF.Epoc_Time,unit='s')
-
-mpdDF.plot(x='Hour', y='Miles', kind='scatter')
-plt.savefig('miles_avg.png')
+CitiAvgDF=CitiAvgDF.sort_values('Hour',  ascending=False)         
+CitiAvgDF.plot(x='Hour', y='Miles',linestyle='--', marker='o', color='r', kind='line',grid=True)
+plt.savefig("citi_by_hour.png") 
 
 
 ###########################
@@ -141,23 +147,12 @@ schema = StructType(field)
 cur = '/user/gdicarl000/projectdata/citibike/201307-citibike-tripdata.csv'
 c_single = sc.textFile(cur).mapPartitionsWithIndex(parseCITIBIKECSV)
 df = sqlContext.createDataFrame(c_single,schema)
-df.show(10)
-mdf = df.mapPartitionsWithIndex(get_miles)
-df.createOrReplaceTempView("citibike")
-results = spark.sql("SELECT * FROM citibike")
-print(results.show())
 
+# for miles
+CitiAvgDF = save_dataframe_to_plot(df)
+#avgRDD.take(2)
+CitiAvgDF=CitiAvgDF.sort_values('Hour',  ascending=False)         
+CitiAvgDF.plot(x='Hour', y='Miles',linestyle='--', marker='o', color='r', kind='line',grid=True)
+plt.savefig("citi_by_hour.png") 
 
-
-###########
-#print single for test
-
-# convert to pdf
-#pdDF = df.toPandas()#pdf = pdf.cumsum()
-#pdDF.plot(x='starttime', y='start_latitude')
-#plt.savefig('foo.png')
-
-cur = '/user/gdicarl000/projectdata/citibike/201307-citibike-tripdata.csv'
-c_single = sc.textFile(cur).mapPartitionsWithIndex(parseCITIBIKECSV)
-df = sqlContext.createDataFrame(c_single,schema)
 '''
