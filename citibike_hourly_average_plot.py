@@ -107,7 +107,7 @@ def get_plot_df(df, hour):
    #mdf.show(10)
    return mdf
 
-def save_plot_by_hour(df):
+def save_plot_by_hour(df, title):
    for hr in range(0,24):
       mdf = get_plot_df(df, hr)
       # convert to panda df
@@ -119,7 +119,7 @@ def save_plot_by_hour(df):
       CitiAvgDF=CitiAvgDF.sort_values('Minutes',  ascending=False)  
       t = "TripDuration(10 min truncated) vs avg mile on hour: " + str(hr)
       CitiAvgDF.plot(x='Minutes', y='Miles',linestyle='--', marker='o', color='r', kind='line',grid=True, title=t)
-      f = "citi_by_hour_"+str(hr)+".png"
+      f = title+"_by_hour_"+str(hr)+".png"
       plt.savefig(f) 
 
 # for each citibike there is df, union them all
