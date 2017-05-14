@@ -87,6 +87,6 @@ save_plot_by_hour(yellow)
 def create_items():
    yellow = read_yellow_to_dataframe()
    citi =get_one_citi()
-   save_plot_by_hour(citi)
-   save_plot_by_hour(yellow)
+   save_plot_by_hour(citi, "CitiBike")
+   save_plot_by_hour(yellow, "YellowCab")
 
