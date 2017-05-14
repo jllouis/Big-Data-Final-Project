@@ -53,7 +53,7 @@ def parseCITIBIKECSV(idx, part):
    for line in part:
       row = line.split(',')
       try:
-         duration_bucket = int(float(row[0][1:-1])/10)
+         duration_bucket = int(float(row[0][1:-1])/10)*10
          date = row[1][1:-1].split(' ')
          hour = date[1].split(':')[0]
          #if hour >= 7 and hour <= 9:
