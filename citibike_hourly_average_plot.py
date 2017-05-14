@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 plt.switch_backend('agg') # to enable plot in backend
-
+from py4j.protocol import Py4JJavaError
 
 '''0) tripduration,   => 634
    1) starttime,      => 2013-07-01 00:00:00  datetime.strptime('2013-07-01 00:00:00', '%Y-%m-%d %H:%M:%S')
@@ -52,13 +52,14 @@ def parseCITIBIKECSV(idx, part):
       part.next()
    for line in part:
       row = line.split(',')
-      if row=='""':
+      try:
+         duration_bucket = int(float(row[0][1:-1])/10)
+         date = row[1][1:-1].split(' ')
+         hour = date[1].split(':')[0]
+         #if hour >= 7 and hour <= 9:
+         yield (float(row[5][1:-1]),float(row[6][1:-1]),int(row[7][1:-1]),float(row[9][1:-1]),float(row[10][1:-1]),int(hour), duration_bucket)
+      except:
          continue
-      date = row[1][1:-1].split(' ')
-      hour = date[1].split(':')[0]
-      #if hour >= 7 and hour <= 9:
-      duration_bucket = int(int(row[0][1:-1])/10)
-      yield (float(row[5][1:-1]),float(row[6][1:-1]),int(row[7][1:-1]),float(row[9][1:-1]),float(row[10][1:-1]),int(hour), duration_bucket)
          
 def get_miles(part):
       start = (part[0], part[1])
@@ -71,13 +72,12 @@ def get_miles(part):
 # define that schema
 # convert rdd to rdd using that scmema
 def read_citibike_to_dataframe():                      
-   end = datetime.strptime('201703', '%Y%m')
-   start = datetime.strptime('201307', '%Y%m')
+   end = datetime.strptime('201601', '%Y%m')
+   start = datetime.strptime('201501', '%Y%m')
    # create fields to give csv structure
-   field_name = ['start_latitude','start_longitude', 'vendor_id', 'end_latitude', 'end_longitude','starttime','duration']   
-   field_type = [FloatType(), FloatType(),IntegerType(), FloatType(), FloatType(), IntegerType(),IntegerType()]
    # create schema
    schema=get_citi_schema()
+   print"Start reading"
    while start < end:
       cur = '/user/gdicarl000/projectdata/citibike/'+start.strftime('%Y%m')+'-citibike-tripdata.csv'
       c = sc.textFile(cur).cache()
@@ -89,20 +89,6 @@ def read_citibike_to_dataframe():
       #print c2.count()
       yield df
         
-
-# for each citibike there is df, union them all
-def get_one_citi():
-   citi = read_citibike_to_dataframe()
-   s =None
-   for i in citi:
-      if s == None:
-         print('start')
-         s = i
-      else:
-         if i!=None:
-            s = s.unionAll(i)
-   return s
-
 def get_single():
       cur = '/user/gdicarl000/projectdata/citibike/201307-citibike-tripdata.csv'
       r = sc.textFile(cur).cache()
@@ -136,11 +122,22 @@ def save_plot_by_hour(df):
       f = "citi_by_hour_"+str(hr)+".png"
       plt.savefig(f) 
 
-
+# for each citibike there is df, union them all
+def get_one_citi():
+   citi = read_citibike_to_dataframe()
+   s =None
+   for i in citi:
+      if s == None:
+         print('start')
+         s = i
+      else:
+         if i!=None:
+            s = s.unionAll(i)
+   return s
 # get combined dataframe of all
-df =get_one_citi()
+citi =get_one_citi()
 #df = get_single()
-save_plot_by_hour(df)
+save_plot_by_hour(citi)
 #df.createOrReplaceTempView("citibike")
 #results = spark.sql("SELECT * FROM citibike")
 #results.show()
