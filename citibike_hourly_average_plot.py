@@ -30,8 +30,16 @@ plt.switch_backend('agg') # to enable plot in backend
    14) gender,        => 0
 
 '''
-
-# get next month
+def get_citi_schema():
+      field_name = ['start_latitude','start_longitude', 'vendor_id', 'end_latitude', 'end_longitude','starttime','duration']   
+      field_type = [FloatType(), FloatType(),IntegerType(), FloatType(), FloatType(), IntegerType(),IntegerType()]
+      # create schema
+      field=[]
+      for i in range(0,7):
+            field.append(StructField(field_name[i], field_type[i]))
+      schema = StructType(field)# get next month
+      return schema
+   
 def next_month(start):
    month = start.month
    while month == start.month:
@@ -44,18 +52,20 @@ def parseCITIBIKECSV(idx, part):
       part.next()
    for line in part:
       row = line.split(',')
+      if row=='""':
+         continue
       date = row[1][1:-1].split(' ')
       hour = date[1].split(':')[0]
       #if hour >= 7 and hour <= 9:
-      yield (float(row[5][1:-1]),float(row[6][1:-1]),int(row[7][1:-1]),float(row[9][1:-1]),float(row[10][1:-1]),int(hour), int(row[0])
+      duration_bucket = int(int(row[0][1:-1])/10)
+      yield (float(row[5][1:-1]),float(row[6][1:-1]),int(row[7][1:-1]),float(row[9][1:-1]),float(row[10][1:-1]),int(hour), duration_bucket)
          
 def get_miles(part):
-   start = (part[0], part[1])
-   end = (part[3], part[4])
-   m = vincenty(start,end).miles
-   return (part[6], m)
+      start = (part[0], part[1])
+      end = (part[3], part[4])
+      m = vincenty(start,end).miles
+      return (part[6], m)
    
-
 # create rdd, read from citibike files
 # map rdd to a schema we want
 # define that schema
@@ -67,13 +77,11 @@ def read_citibike_to_dataframe():
    field_name = ['start_latitude','start_longitude', 'vendor_id', 'end_latitude', 'end_longitude','starttime','duration']   
    field_type = [FloatType(), FloatType(),IntegerType(), FloatType(), FloatType(), IntegerType(),IntegerType()]
    # create schema
-   field=[]
-   for i in range(0,7):
-      field.append(StructField(field_name[i], field_type[i]))
-   schema = StructType(field)
+   schema=get_citi_schema()
    while start < end:
       cur = '/user/gdicarl000/projectdata/citibike/'+start.strftime('%Y%m')+'-citibike-tripdata.csv'
-      c2 = sc.textFile(cur).mapPartitionsWithIndex(parseCITIBIKECSV)
+      c = sc.textFile(cur).cache()
+      c2 = c.mapPartitionsWithIndex(parseCITIBIKECSV)
       df = sqlContext.createDataFrame(c2,schema)
       start= next_month(start)
       #df.show(10)
@@ -83,7 +91,6 @@ def read_citibike_to_dataframe():
         
 
 # for each citibike there is df, union them all
-
 def get_one_citi():
    citi = read_citibike_to_dataframe()
    s =None
@@ -96,62 +103,48 @@ def get_one_citi():
             s = s.unionAll(i)
    return s
 
-def save_dataframe_to_plot(df):
+def get_single():
+      cur = '/user/gdicarl000/projectdata/citibike/201307-citibike-tripdata.csv'
+      r = sc.textFile(cur).cache()
+      c_single = r.mapPartitionsWithIndex(parseCITIBIKECSV)
+      schema = get_citi_schema()
+      df = sqlContext.createDataFrame(c_single,schema)
+      return df
+      
+def get_plot_df(df, hour):
    # for miles
-   avgRDD = yellow.rdd.map(get_miles)
-   avgRDD= avgRDD.mapValues(lambda x: (x,1))
-   avgRDD = avgRDD.reduceByKey(lambda x, y: (x[0] + y[0], x[1] + y[1]))
-   avgRDD= avgRDD.mapValues(lambda y : 1.0 * y[0] / y[1])
+   avgRDD = df.rdd.filter(lambda x: x[5] == hour)
+   avgRDD= avgRDD.map(get_miles).filter(lambda x: x[1] >0).mapValues(lambda x: (x,1)).reduceByKey(lambda x, y: (x[0] + y[0], x[1] + y[1])).mapValues(lambda y : 1.0 * y[0] / y[1])
    #avgRDD.show(2)
-
-   schema2 = StructType([StructField("Hour", IntegerType()), StructField("Miles", FloatType())])
+   schema2 = StructType([StructField("Minutes", IntegerType()), StructField("Miles", FloatType())])
    mdf = sqlContext.createDataFrame(avgRDD,schema2)
    #mdf.show(10)
+   return mdf
 
-   # convert to panda df
-   mpdDF = mdf.toPandas()
-return mpDF
+def save_plot_by_hour(df):
+   for hr in range(0,24):
+      mdf = get_plot_df(df, hr)
+      # convert to panda df
+      CitiAvgDF = mdf.toPandas()
+      quantile=CitiAvgDF['Minutes'].quantile(.95)
+      for index, row in CitiAvgDF.iterrows():
+         if (row["Minutes"] >= quantile):
+            CitiAvgDF.drop(index, inplace=True)
+      CitiAvgDF=CitiAvgDF.sort_values('Minutes',  ascending=False)  
+      t = "TripDuration(10 min truncated) vs avg mile on hour: " + str(hr)
+      CitiAvgDF.plot(x='Minutes', y='Miles',linestyle='--', marker='o', color='r', kind='line',grid=True, title=t)
+      f = "citi_by_hour_"+str(hr)+".png"
+      plt.savefig(f) 
 
 
 # get combined dataframe of all
-comb =get_one_citi()
-#comb.createOrReplaceTempView("citibike")
-#results = spark.sql("SELECT count(*) FROM citibike")
-#print(results.show())
-
-#store table
+df =get_one_citi()
+#df = get_single()
+save_plot_by_hour(df)
+#df.createOrReplaceTempView("citibike")
+#results = spark.sql("SELECT * FROM citibike")
+#results.show()
+# to store table on hdfs
 #comb.coalesce(1).write.format('com.databricks.spark.csv').option("header", "true").save('/user/btimals000/citibike_spark1.csv')
 
-# for miles
-CitiAvgDF = save_dataframe_to_plot(comb)
-#avgRDD.take(2)
-CitiAvgDF=CitiAvgDF.sort_values('Hour',  ascending=False)         
-CitiAvgDF.plot(x='Hour', y='Miles',linestyle='--', marker='o', color='r', kind='line',grid=True)
-plt.savefig("citi_by_hour.png") 
 
-
-###########################
-#for single file for  testing
-# create fields to give csv structure
-'''
-field_name = ['start_latitude','start_longitude', 'end_id', 'end_latitude', 'end_longitude','starttime']   
-field_type = [FloatType(), FloatType(),IntegerType(), FloatType(), FloatType(), IntegerType()]
-# create schema
-field=[]
-for i in range(0,6):
-   print i
-   field.append(StructField(field_name[i], field_type[i]))
-        
-schema = StructType(field)
-cur = '/user/gdicarl000/projectdata/citibike/201307-citibike-tripdata.csv'
-c_single = sc.textFile(cur).mapPartitionsWithIndex(parseCITIBIKECSV)
-df = sqlContext.createDataFrame(c_single,schema)
-
-# for miles
-CitiAvgDF = save_dataframe_to_plot(df)
-#avgRDD.take(2)
-CitiAvgDF=CitiAvgDF.sort_values('Hour',  ascending=False)         
-CitiAvgDF.plot(x='Hour', y='Miles',linestyle='--', marker='o', color='r', kind='line',grid=True)
-plt.savefig("citi_by_hour.png") 
-
-'''
