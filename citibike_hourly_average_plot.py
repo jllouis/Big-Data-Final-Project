@@ -47,13 +47,13 @@ def parseCITIBIKECSV(idx, part):
       date = row[1][1:-1].split(' ')
       hour = date[1].split(':')[0]
       #if hour >= 7 and hour <= 9:
-      yield (float(row[5][1:-1]),float(row[6][1:-1]),int(row[7][1:-1]),float(row[9][1:-1]),float(row[10][1:-1]),int(hour))
+      yield (float(row[5][1:-1]),float(row[6][1:-1]),int(row[7][1:-1]),float(row[9][1:-1]),float(row[10][1:-1]),int(hour), int(row[0])
          
 def get_miles(part):
    start = (part[0], part[1])
    end = (part[3], part[4])
    m = vincenty(start,end).miles
-   return (part[5], m)
+   return (part[6], m)
    
 
 # create rdd, read from citibike files
@@ -64,12 +64,11 @@ def read_citibike_to_dataframe():
    end = datetime.strptime('201703', '%Y%m')
    start = datetime.strptime('201307', '%Y%m')
    # create fields to give csv structure
-   field_name = ['start_latitude','start_longitude', 'end_id', 'end_latitude', 'end_longitude','starttime']   
-   field_type = [FloatType(), FloatType(),IntegerType(), FloatType(), FloatType(), StringType()]
+   field_name = ['start_latitude','start_longitude', 'vendor_id', 'end_latitude', 'end_longitude','starttime','duration']   
+   field_type = [FloatType(), FloatType(),IntegerType(), FloatType(), FloatType(), IntegerType(),IntegerType()]
    # create schema
    field=[]
-   for i in range(0,6):
-      print i
+   for i in range(0,7):
       field.append(StructField(field_name[i], field_type[i]))
    schema = StructType(field)
    while start < end:
