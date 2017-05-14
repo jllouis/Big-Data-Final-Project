@@ -49,6 +49,25 @@ def parseYELLOWCSV(idx, part):
       except:
          continue
          
+def parseYELLOWCSV_For_loc(idx,part):
+   if(idx==0):
+      part.next()
+   for line in part:
+      try: 
+         row = line.split(',')
+         pick = datetime.strptime(row[1], '%Y-%m-%d %H:%M:%S') #2015-01-08 22:44:09
+         drop = datetime.strptime(row[2], '%Y-%m-%d %H:%M:%S')
+         duration = (drop - pick).total_seconds()/60 # for each 10 minutes
+         #if hour >= 7 and hour <= 9:
+         s = (float(row[6]), float(row[5]))
+         e = (float(row[10]), float(row[9]))
+         filter_loc  = (40.70255088,-73.98940236)
+         m = vincenty(s,filter_loc).miles
+         
+         yield (float(row[6]), float(row[5]), int(row[0]), float(row[10]), float(row[9]), pick.hour,(int(duration)/10)*10)
+      except:
+         continue
+         
 def get_yellow_schema():
    field=[]
    field_name = ['start_latitude','start_longitude', 'vendor_id', 'end_latitude', 'end_longitude','starttime','duration']   
@@ -69,6 +88,14 @@ def read_yellow_to_dataframe():
    df = sqlContext.createDataFrame(c2,schema)
    return df
 
+def read_yellow_to_dataframe_loc():                      
+   # create fields to give csv structure
+   # create schema
+   schema = get_yellow_schema()
+   cur = '/user/gdicarl000/projectdata/cardata.csv'
+   c2 = sc.textFile(cur).mapPartitionsWithIndex(parseYELLOWCSV_For_loc)
+   df = sqlContext.createDataFrame(c2,schema)
+   return df
 # def save_dataframe_to_plot(df) defined in citibike py
 # def get_miles(part) defined in citibike py
 # def get_plot_df(df, hour)
@@ -83,10 +110,22 @@ save_plot_by_hour(yellow)
 #YellowsDF=yellowMpdDF.sort_values('Hour',  ascending=False)         
 #YellowsDF.plot(x='Minutes', y='Miles',linestyle='--', marker='X', color='b', kind='line',grid=True)
 #plt.savefig("yellow_by_hour.png")     
+start_loc = spark.sql("Select distinct start_latitude as lat, start_longitude as lon from citibike")
+start_loc.createOrReplaceTempView("start_loc")
+end_loc = spark.sql("Select distinct end_latitude as lat, end_longitude as lon from citibike")
+end_loc.createOrReplaceTempView("end_loc")
+res = spark.sql("Select * from start_loc")
+res.show()
 
 def create_items():
    yellow = read_yellow_to_dataframe()
    citi =get_one_citi()
    save_plot_by_hour(citi, "CitiBike")
    save_plot_by_hour(yellow, "YellowCab")
-
+   
+'''
+Front St & Washington St
+Bike station 4936.01
+Last updated 10:23:51 AM
+"40.70255088","-73.98940236"
+'''
