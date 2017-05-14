@@ -45,7 +45,7 @@ def parseYELLOWCSV(idx, part):
          drop = datetime.strptime(row[2], '%Y-%m-%d %H:%M:%S')
          duration = (drop - pick).total_seconds()/60 # for each 10 minutes
          #if hour >= 7 and hour <= 9:
-         yield (float(row[6]), float(row[5]), int(row[0]), float(row[10]), float(row[9]), pick.hour,int(duration)/10)
+         yield (float(row[6]), float(row[5]), int(row[0]), float(row[10]), float(row[9]), pick.hour,(int(duration)/10)*10)
       except:
          continue
          
