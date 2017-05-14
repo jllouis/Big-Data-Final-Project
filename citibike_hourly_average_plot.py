@@ -108,19 +108,24 @@ def get_plot_df(df, hour):
    return mdf
 
 def save_plot_by_hour(df, title):
-   for hr in range(0,24):
+   for hr in (8, 9, 17, 18):
       mdf = get_plot_df(df, hr)
       # convert to panda df
-      CitiAvgDF = mdf.toPandas()
+      AvgDF = mdf.toPandas()
       quantile=CitiAvgDF['Minutes'].quantile(.95)
+      quantile=CitiAvgDF['Miles'].quantile(.95)
       for index, row in CitiAvgDF.iterrows():
          if (row["Minutes"] >= quantile):
-            CitiAvgDF.drop(index, inplace=True)
-      CitiAvgDF=CitiAvgDF.sort_values('Minutes',  ascending=False)  
+            AvgDF.drop(index, inplace=True)
+         if (row["Miles"] >= quantile):
+            AvgDF.drop(index, inplace=True)
+      AvgDF=AvgDF.sort_values('Minutes',  ascending=False)  
       t = "TripDuration(10 min truncated) vs avg mile on hour: " + str(hr)
-      CitiAvgDF.plot(x='Minutes', y='Miles',linestyle='--', marker='o', color='r', kind='line',grid=True, title=t)
+      AvgDF.plot(x='Minutes', y='Miles',linestyle='--', marker='o', color='r', kind='line',grid=True, title=t)
       f = title+"_by_hour_"+str(hr)+".png"
       plt.savefig(f) 
+      del AvgDF
+      
 
 # for each citibike there is df, union them all
 def get_one_citi():
@@ -138,7 +143,8 @@ def get_one_citi():
 citi =get_one_citi()
 #df = get_single()
 save_plot_by_hour(citi)
-#df.createOrReplaceTempView("citibike")
+citi.createOrReplaceTempView("citibike")
+yellow.createOrReplaceTempView("yellow")
 #results = spark.sql("SELECT * FROM citibike")
 #results.show()
 # to store table on hdfs
