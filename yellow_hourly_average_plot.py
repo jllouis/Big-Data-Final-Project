@@ -39,15 +39,16 @@ def parseYELLOWCSV(idx, part):
    if(idx==0):
       part.next()
    for line in part:
-      row = line.split(',')
-      pick = datetime.strptime(row[1], '%Y-%m-%d %H:%M:%S') #2015-01-08 22:44:09
-      drop = datetime.strptime(row[2], '%Y-%m-%d %H:%M:%S')
-      duration = (drop - pick).total_seconds()/60 # for each 10 minutes
-      #if hour >= 7 and hour <= 9:
-      yield (float(row[6]), float(row[5]), int(row[0]), float(row[10]), float(row[9]), pick.hour,int(duration)/10)
+      try: 
+         row = line.split(',')
+         pick = datetime.strptime(row[1], '%Y-%m-%d %H:%M:%S') #2015-01-08 22:44:09
+         drop = datetime.strptime(row[2], '%Y-%m-%d %H:%M:%S')
+         duration = (drop - pick).total_seconds()/60 # for each 10 minutes
+         #if hour >= 7 and hour <= 9:
+         yield (float(row[6]), float(row[5]), int(row[0]), float(row[10]), float(row[9]), pick.hour,int(duration)/10)
+      except:
+         continue
          
-
-
 def get_yellow_schema():
    field=[]
    field_name = ['start_latitude','start_longitude', 'vendor_id', 'end_latitude', 'end_longitude','starttime','duration']   
