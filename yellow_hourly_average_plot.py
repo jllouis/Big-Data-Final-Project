@@ -34,73 +34,62 @@ plt.switch_backend('agg') # to enable plot in backend
 17 total_amount
 '''
 
-# get next month
-def next_month(start):
-   month = start.month
-   while month == start.month:
-      start+=timedelta(days = 1)
-   return start
-
-#parse citi csv
+#parse yellow csv
 def parseYELLOWCSV(idx, part):
    if(idx==0):
       part.next()
    for line in part:
       row = line.split(',')
-      date = row[1].split(' ')
-      hour = date[1].split(':')[0]
+      pick = datetime.strptime(row[1], '%Y-%m-%d %H:%M:%S') #2015-01-08 22:44:09
+      drop = datetime.strptime(row[2], '%Y-%m-%d %H:%M:%S')
+      duration = (drop - pick).total_seconds()/60 # for each 10 minutes
       #if hour >= 7 and hour <= 9:
-      yield (
-      yield (float(row[6]),float(row[5]),int(row[0]),float(row[10]),float(row[9]),int(hour))
+      yield (float(row[6]), float(row[5]), int(row[0]), float(row[10]), float(row[9]), pick.hour,int(duration)/10)
          
 def get_miles(part):
    start = (part[0], part[1])
    end = (part[3], part[4])
    m = vincenty(start,end).miles
-   return (part[5], m)
+   return (part[6], m)
    
 
 # create rdd, read from yellow files
 #convert to data frame
 def read_yellow_to_dataframe():                      
-
    # create fields to give csv structure
-   field_name = ['start_latitude','start_longitude', 'vendor_id', 'end_latitude', 'end_longitude','starttime']   
-   field_type = [FloatType(), FloatType(),IntegerType(), FloatType(), FloatType(), StringType()]
-  
+   field_name = ['start_latitude','start_longitude', 'vendor_id', 'end_latitude', 'end_longitude','starttime','duration']   
+   field_type = [FloatType(), FloatType(),IntegerType(), FloatType(), FloatType(), IntegerType(),IntegerType()]
    # create schema
    field=[]
-   for i in range(0,6):
-      print i
+   for i in range(0,7):
       field.append(StructField(field_name[i], field_type[i]))
    schema = StructType(field)  
    cur = '/user/gdicarl000/projectdata/cardata.csv'
-   c2 = sc.textFile(cur).mapPartitionsWithIndex(parseCITIBIKECSV)
+   c2 = sc.textFile(cur).mapPartitionsWithIndex(parseYELLOWCSV)
    df = sqlContext.createDataFrame(c2,schema)
    return df
 
 def save_dataframe_to_plot(df):
    # for miles
-   avgRDD = yellow.rdd.map(get_miles)
+   avgRDD = yellow.rdd.map(get_miles) # duration per mile
    avgRDD= avgRDD.mapValues(lambda x: (x,1))
    avgRDD = avgRDD.reduceByKey(lambda x, y: (x[0] + y[0], x[1] + y[1]))
    avgRDD= avgRDD.mapValues(lambda y : 1.0 * y[0] / y[1])
    #avgRDD.show(2)
-
    schema2 = StructType([StructField("Hour", IntegerType()), StructField("Miles", FloatType())])
    mdf = sqlContext.createDataFrame(avgRDD,schema2)
    #mdf.show(10)
-
    # convert to panda df
    mpdDF = mdf.toPandas()
    return mpDF
 
 # get combined dataframe of all
 yellow =read_yellow_to_dataframe()
+yellow.show(1)
 yellowMpdDF = save_dataframe_to_plot(yellow)
 
 YellowsDF=yellowMpdDF.sort_values('Hour',  ascending=False)         
-YellowsDF.plot(x='Hour', y='Miles',linestyle='--', marker='o', color='r', kind='line',grid=True)
+YellowsDF.plot(x='Hour', y='Miles',linestyle='--', marker='X', color='b', kind='line',grid=True)
 plt.savefig("yellow_by_hour.png")     
 
 
