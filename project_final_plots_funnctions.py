@@ -157,22 +157,22 @@ def get_plot_df_all(prdd, hour):
 
 
 # In[23]:
-
-def save_plot_by_hour_overall(df, title):
-    df = df.rdd.filter(strip_locations)
+def save_plot_by_hour(df, title):
     for hr in (8, 9, 17, 18):
-        mdf = get_plot_df_all(df, hr)
-        # convert to panda df
-        AvgDF = mdf.toPandas()
-        quantile=AvgDF['Minutes'].quantile(.95)
-        quantile=AvgDF['Miles'].quantile(.95)
-        AvgDF=AvgDF.sort_values('Minutes',  ascending=False)  
-        t = "TripDuration(10 min truncated) vs avg mile on hour: "+ str(hr) +" at " + title
-        AvgDF.plot(x='Minutes', y='Miles',linestyle='--', marker='o', color='r', kind='line',grid=True, title=t)
-        f = title+"_by_hour_"+str(hr)+".png"
-        plt.savefig(f) 
-        del AvgDF
-
+      mdf = get_plot_df(df, hr)
+      # convert to panda df
+      AvgDF = mdf.toPandas()
+      quantile=AvgDF['Minutes'].quantile(.90)
+      quantile=AvgDF['Miles'].quantile(.90)
+      for index, row in AvgDF.iterrows():
+        if (row["Minutes"] >= quantile) or (row["Miles"] >= quantile):
+            AvgDF.drop(index, inplace=True)
+      AvgDF=AvgDF.sort_values('Minutes',  ascending=False)  
+      t = "TripDuration(10 min truncated) vs avg mile on hour: " + str(hr)
+      AvgDF.plot(x='Minutes', y='Miles',linestyle='--', marker='o', color='r', kind='line',grid=True, title=t)
+      f = title+"_by_hour_"+str(hr)+".png"
+      plt.savefig(f) 
+      del AvgDF
 
 # In[25]:
 
