@@ -1,8 +1,6 @@
-from geopy.distance import vincenty
 import csv
-from optparse import OptionParser
 
-
+from geopy.distance import vincenty
 
 # parser = OptionParser(version="%prog 0.1")
 # parser.add_option("-f", "--file", dest="filename", metavar="INPUT_FILE_NAME",
@@ -12,7 +10,7 @@ from optparse import OptionParser
 
 # (options, args) = parser.parse_args()
 
-for iterator in range(0, 2):
+for iterator in range(0, 9):
     with open("Uber_Time_Estimates_"+str(iterator)+".csv", 'rb') as in_file:
         with open("uber_speed_calculation_output_"+str(iterator)+".csv", 'wb') as out_file:
             reader = csv.DictReader(in_file)
