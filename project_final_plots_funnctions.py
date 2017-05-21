@@ -52,7 +52,7 @@ def parseCITIBIKECSV(idx, part):
             date = row[1][1:-1].split(' ')
             hour = date[1].split(':')[0]
             #if hour >= 7 and hour <= 9:
-            yield (float(row[5][1:-1]),float(row[6][1:-1]),int(row[7][1:-1]),float(row[9][1:-1]),float(row[10][1:-1]),int(hour), (intduration_bucket/60))
+            yield (float(row[5][1:-1]),float(row[6][1:-1]),int(row[7][1:-1]),float(row[9][1:-1]),float(row[10][1:-1]),int(hour), (int(duration_bucket/60)))
         except:
             continue
 
@@ -101,25 +101,27 @@ def get_single():
 # In[33]:
 
 def strip_locations(row):
-    filter_start = (40.70255088,-73.98940236) #Front St & Washington St
+    point_1 = (40.7047177,-74.00926027)  #"Pearl St & Hanover Square"
+    point_2 = (40.75513557,-73.98658032) # Broadway & W 41 S  
     start = (row[0], row[1]) 
-    d = vincenty(start,filter_start).miles  
-    if(d >0.10): # 0.1 miles filter
+    end = (row[3],row[4])  
+    d0 = vincenty(start,point_1).miles  
+    d1 = vincenty(start,point_2).miles  
+    if(d0 >0.10 and d1> 0.10): # 0.1 miles filter
         return False
-    filter_end = (40.75513557,-73.98658032) # Broadway & W 41 St
-    end = (row[3],row[4])
-    d2 = vincenty(end,filter_end).miles
-    if(d >0.10): # 0.1 miles filter
+    d2 = vincenty(end,point_1).miles
+    d3 = vincenty(end,point_2).miles
+    if(d2 >0.10 and d3>0.10): # 0.1 miles filter
         return False
     return True
 
 
 # In[22]:
 
-def get_plot_df(prdd, hour):
+def get_plot_df(df, hour):
     # for miles
-    avgRDD = prdd.filter(lambda x: x[5] == hour)
-    avgRDD= avgRDD        .map(get_miles)        .filter(lambda x: x[1] >0)        .mapValues(lambda x: (x,1))        .reduceByKey(lambda x, y: (x[0] + y[0], x[1] + y[1]))        .mapValues(lambda y : 1.0 * y[0] / y[1])
+    avgRDD = df.rdd.filter(lambda x: x[5] == hour)
+    avgRDD= avgRDD.map(get_miles).filter(lambda x: x[1] >0).mapValues(lambda x: (x,1)).reduceByKey(lambda x, y: (x[0] + y[0], x[1] + y[1])).mapValues(lambda y : 1.0 * y[0] / y[1])
     #avgRDD.show(2)
     schema2 = StructType([StructField("Minutes", IntegerType()), StructField("Miles", FloatType())])
     mdf = sqlContext.createDataFrame(avgRDD,schema2)
@@ -136,9 +138,9 @@ def save_plot_by_hour(df, title):
         # convert to panda df
         AvgDF = mdf.toPandas()
         AvgDF=AvgDF.sort_values('Minutes',  ascending=False)  
-        t = "TripDuration(10 min truncated) vs avg mile on hour: "+ str(hr) +" at " + title
+        t = "Miles per minutes in Hour: "+ str(hr) +" at " + title
         AvgDF.plot(x='Minutes', y='Miles',linestyle='--', marker='o', color='r', kind='line',grid=True, title=t)
-        f = title+"_by_hour_"+str(hr)+".png"
+        f = title+'_At_hr_'+str(hr)+'.png'
         plt.savefig(f) 
         del AvgDF
 
@@ -148,7 +150,12 @@ def save_plot_by_hour(df, title):
 def get_plot_df_all(prdd, hour):
     # for miles
     avgRDD = prdd
-    avgRDD= avgRDD        .map(get_miles)        .filter(lambda x: x[1] >0)        .mapValues(lambda x: (x,1))        .reduceByKey(lambda x, y: (x[0] + y[0], x[1] + y[1]))        .mapValues(lambda y : 1.0 * y[0] / y[1])
+    avgRDD= avgRDD\
+        .map(get_miles)\
+        .filter(lambda x: x[1] >0)\
+        .mapValues(lambda x: (x,1))\
+        .reduceByKey(lambda x, y: (x[0] + y[0], x[1] + y[1]))\
+        .mapValues(lambda y : 1.0 * y[0] / y[1])
     #avgRDD.show(2)
     schema2 = StructType([StructField("Minutes", IntegerType()), StructField("Miles", FloatType())])
     mdf = sqlContext.createDataFrame(avgRDD,schema2)
@@ -159,20 +166,20 @@ def get_plot_df_all(prdd, hour):
 # In[23]:
 def save_plot_by_hour(df, title):
     for hr in (8, 9, 17, 18):
-      mdf = get_plot_df(df, hr)
-      # convert to panda df
-      AvgDF = mdf.toPandas()
-      quantile=AvgDF['Minutes'].quantile(.90)
-      quantile=AvgDF['Miles'].quantile(.90)
-      for index, row in AvgDF.iterrows():
-        if (row["Minutes"] >= quantile) or (row["Miles"] >= quantile):
-            AvgDF.drop(index, inplace=True)
-      AvgDF=AvgDF.sort_values('Minutes',  ascending=False)  
-      t = "TripDuration(10 min truncated) vs avg mile on hour: " + str(hr)
-      AvgDF.plot(x='Minutes', y='Miles',linestyle='--', marker='o', color='r', kind='line',grid=True, title=t)
-      f = title+"_by_hour_"+str(hr)+".png"
-      plt.savefig(f) 
-      del AvgDF
+        mdf = get_plot_df(df, hr)
+        # convert to panda df
+        AvgDF = mdf.toPandas()
+        quantile=AvgDF['Minutes'].quantile(.90)
+        quantile=AvgDF['Miles'].quantile(.90)
+        for index, row in AvgDF.iterrows():
+            if (row["Minutes"] >= quantile) or (row["Miles"] >= quantile):
+                AvgDF.drop(index, inplace=True)
+        AvgDF=AvgDF.sort_values('Minutes',  ascending=False)  
+        t = "Miles per minutes in Hour: "+ str(hr) +" at " + title
+        AvgDF.plot(x='Minutes', y='Miles',linestyle='--', marker='o', color='r', kind='line',grid=True, title=t)
+        f = title+"_by_hour_"+str(hr)+".png"
+        plt.savefig(f) 
+        del AvgDF
 
 # In[25]:
 
@@ -202,7 +209,7 @@ def parseYELLOWCSV(idx, part):
             drop = datetime.strptime(row[2], '%Y-%m-%d %H:%M:%S')
             duration = (drop - pick).total_seconds()/60 
             #if hour >= 7 and hour <= 9:
-            yield (float(row[6]), float(row[5]), int(row[0]), float(row[10]), float(row[9]), pick.hour,(int(duration))
+            yield (float(row[6]), float(row[5]), int(row[0]), float(row[10]), float(row[9]), pick.hour,(int(duration)))
         except:
             continue
 
@@ -267,7 +274,12 @@ def get_avg_by_hr(df):
     schema2 = StructType([StructField("Minutes", IntegerType()), StructField("Miles", FloatType())])
     for hr in (8, 9, 17, 18):
         avgRDD = df.filter(lambda x: x[5] == hr)
-        avgRDD= avgRDD        .map(get_miles)        .filter(lambda x: x[1] >0)        .mapValues(lambda x: (x,1))        .reduceByKey(lambda x, y: (x[0] + y[0], x[1] + y[1]))        .mapValues(lambda y : 1.0 * y[0] / y[1])
+        avgRDD= avgRDD\
+            .map(get_miles)\
+            .filter(lambda x: x[1] >0)\
+            .mapValues(lambda x: (x,1))\
+            .reduceByKey(lambda x, y: (x[0] + y[0], x[1] + y[1]))\
+            .mapValues(lambda y : 1.0 * y[0] / y[1])
         mdf = sqlContext.createDataFrame(avgRDD,schema2)
         mdf.createOrReplaceTempView("TEMP")
         result = spark.sql("SELECT sum(Minutes), sum(Miles) FROM TEMP")
@@ -280,9 +292,9 @@ def get_avg_by_hr(df):
 yellow = read_yellow_to_dataframe()
 yellow_t = read_yellow_truncated()
 citi =get_one_citi()
-save_plot_by_hour(citi, "CITI_Front_Broadway")
-save_plot_by_hour(yellow, "YellowCab_Front_Broadway")
-save_plot_by_hour_overall(yellow_t, "YellowCab_Front_Broadway_OverAll")
-get_avg_by_hr(citi)
-get_avg_by_hr(yrllow)
+save_plot_by_hour(citi, "CITI_Pearl_Broadway")
+save_plot_by_hour(yellow, "YellowCab_pearl_Broadway")
+#save_plot_by_hour_overall(yellow_t, "YellowCab_Front_Broadway_OverAll")
+#get_avg_by_hr(citi)
+#get_avg_by_hr(yrllow)
 
