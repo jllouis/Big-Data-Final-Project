@@ -58,7 +58,6 @@ print "Was unable to match " + str(unmatched) + " stations."
 
 ''' sort to get the most popular stations based on ENTRIES number '''
 top_entry_stations = sorted(station_totals.items(), key=operator.itemgetter(0), reverse=True)
-# top_exit_stations = sorted(station_totals.items(), key=operator.itemgetter(1), reverse=True)
 
 
 print "Number of Stations: " + str(numStations)
@@ -74,20 +73,6 @@ top_entry_stations_reversed = []
 
 for i in range(99, -1, -1):
     top_entry_stations_reversed.append(top_entry_stations[i])
-
-# Commented out the following code because I figured the most popular entry and exist stations
-# would have much overlap since people usually use the same station to exit to work, and commute to home
-# for i in range(0, 100):
-#     if top_exit_stations[i][1][3] is None:
-#         del top_exit_stations[i]
-#
-# # print top 50 stations
-# print "Top Exit Stations:"
-# for x in range(100):
-#         print top_exit_stations[x]
-
-# print len(top_entry_stations_reversed)
-# print len(top_entry_stations)
 
 ''' output files into a csv, put nth most popular station along side nth least popular station, for Uber processing '''
 with open('Popular_Stations_Output.csv', 'wb') as fi:
